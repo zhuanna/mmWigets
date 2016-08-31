@@ -1,0 +1,13 @@
+#tabMenu{
+    display:table;
+    width: 100%;
+}
+.tabMenuSubs{
+    display:table-cell;
+}
+.tabContentSubs{
+    display:none;
+}
+.tabContentSubs:first-child{
+    display:block;
+}
