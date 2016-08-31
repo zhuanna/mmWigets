@@ -51,9 +51,9 @@
 	__webpack_require__(1);
 	//全局变量
 	window.mmWigets = {
-	    tab : __webpack_require__(5),
+	    //tab : require('./tab.js'),
 	    //addMore : require('./addMore.js'),
-	    ajax : __webpack_require__(8),
+	    //ajax : require('./ajax.js'),
 	    //createMoreBtn : require('./createMoreBtn.js'),
 	    //base64 : require('./base64.js')
 	};
@@ -405,135 +405,6 @@
 			URL.revokeObjectURL(oldSrc);
 	}
 
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by anna on 16/8/19.
-	 * 传入菜单和内容的id,及子级的class实现内容切换
-	 * 默认为#tabMenu .tabMenuSubs #tabContent .tabContentSubs
-	 * 菜单激活的样式和active
-	 * 内容为显示和隐藏的关系
-	 */
-	__webpack_require__(6);
-
-	var tabWiget = function(arg){
-	    var setting = {
-	        menuID : arg.menuID || 'tabMenu',
-	        menuSubs : arg.menuSubs || 'tabMenuSubs',
-	        contentID : arg.contentID || 'tabContent',
-	        contentSubs : arg.contentSubs || 'tabContentSubs',
-	        callback : arg.callback || null
-	    };
-	    var menuSubs = $('#'+setting.menuID).find('.' + setting.menuSubs),
-	        contentSubs = $('#'+setting.contentID).find('.' + setting.contentSubs);
-	    //event
-	    menuSubs.each(function(index){
-	        $(this).attr('data-index',index);
-	        $(this).bind('click',function(){
-	            var thisIndex = $(this).attr('data-index') || 0;
-	            menuSubs.removeClass('active');
-	            $(this).addClass('active');
-	            contentSubs.hide();
-	            contentSubs.eq(thisIndex).show();
-	            if(typeof setting.callback === 'function'){
-	                setting.callback(this,contentSubs.eq(thisIndex));
-	            }
-	        });
-	    });
-	};
-
-	module.exports = tabWiget;
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-
-	// load the styles
-	var content = __webpack_require__(7);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(4)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../node_modules/css-loader/index.js!./tab.css", function() {
-				var newContent = require("!!./../node_modules/css-loader/index.js!./tab.css");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(3)();
-	// imports
-
-
-	// module
-	exports.push([module.id, "#tabMenu{\n    display:table;\n    width: 100%;\n}\n.tabMenuSubs{\n    display:table-cell;\n}\n.tabContentSubs{\n    display:none;\n}\n.tabContentSubs:first-child{\n    display:block;\n}", ""]);
-
-	// exports
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports) {
-
-	/**
-	 * Created by anna on 16/8/22.
-	 * 公共的ajax函数
-	 * 参数
-	 * url:请求地址
-	 * method:请求方式 get,post
-	 * data:请求参数--对象格式传入
-	 * callback回调参数
-	 */
-	var ajax = function(arg){
-
-	    if(!arg.url){
-	        alert('没有url参数');
-	        return;
-	    }
-
-	    if(arg.data && typeof arg.data != 'object'){
-	        alert('请输入key-value格式的参数');
-	        return;
-	    }
-
-	    arg.data = (arg.data)?arg.data:{};
-
-	    arg.data.ran = new Date().getTime();
-
-	    $.ajax({
-	        url : arg.url,
-	        method : arg.method || 'get',
-	        data : arg.data || {},
-	        dataType: arg.dataType || 'json',
-	        timeout : arg.timeout || 3000,
-	        success : function(data){
-	            if(typeof arg.callback === 'function'){
-	                arg.callback(data, arg.btn);
-	            }
-	        },
-	        error : function(xhr){
-	            console.log(xhr);
-	        }
-	    });
-	};
-
-	module.exports = ajax;
 
 /***/ }
 /******/ ]);
