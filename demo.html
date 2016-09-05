@@ -5,9 +5,25 @@
     <title>Title</title>
 </head>
 <body>
-<scipt src="build/mmWigets.js"></scipt>
+<input type="button" value="倒计时按钮" id="countDown">
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="build/mmWigets.js"></script>
 <script>
     //mmWigets
+    console.log(mmWigets.tool.isChinaMobile('15810891777'))
+    console.log(mmWigets.tool.isChinaMobile('111111111'))
+    console.log(mmWigets.tool.isChinaMobile('中'))
+    console.log(mmWigets.tool.isChinaMobile('13381056977'))
+    //countDown
+    $('#countDown').bind('click',function(){
+        mmWigets.countDown({
+            time:10,
+            btn:$('#countDown')
+        })
+    });
+    //popWindow
+    mmWigets.popWinow.tip('我来也!')
+
 </script>
 </body>
 </html>

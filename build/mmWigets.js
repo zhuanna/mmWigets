@@ -53,9 +53,12 @@
 	window.mmWigets = {
 	    //tab : require('./tab.js'),
 	    //addMore : require('./addMore.js'),
-	    //ajax : require('./ajax.js'),
+	    ajax : __webpack_require__(5),
 	    //createMoreBtn : require('./createMoreBtn.js'),
-	    //base64 : require('./base64.js')
+	    //base64 : require('./base64.js'),
+	    tool:__webpack_require__(6),
+	    countDown:__webpack_require__(7),
+	    popWinow:__webpack_require__(8)
 	};
 
 /***/ },
@@ -404,6 +407,243 @@
 		if(oldSrc)
 			URL.revokeObjectURL(oldSrc);
 	}
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	/**
+	 * Created by anna on 16/8/22.
+	 * 公共的ajax函数
+	 * 参数
+	 * url:请求地址
+	 * method:请求方式 get,post
+	 * data:请求参数--对象格式传入
+	 * callback回调参数
+	 */
+	var ajax = function(arg){
+
+	    if(!arg.url){
+	        alert('没有url参数');
+	        return;
+	    }
+
+	    if(arg.data && typeof arg.data != 'object'){
+	        alert('请输入key-value格式的参数');
+	        return;
+	    }
+
+	    arg.data = (arg.data)?arg.data:{};
+
+	    arg.data.ran = new Date().getTime();
+
+	    $.ajax({
+	        url : arg.url,
+	        method : arg.method || 'get',
+	        data : arg.data || {},
+	        dataType: arg.dataType || 'json',
+	        timeout : arg.timeout || 3000,
+	        success : function(data){
+	            if(typeof arg.callback === 'function'){
+	                arg.callback(data, arg.btn);
+	            }
+	        },
+	        error : function(xhr){
+	            console.log(xhr);
+	        }
+	    });
+	};
+
+	module.exports = ajax;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	/**
+	 * Created by anna on 16/9/2.
+	 * 工具函数tool
+	 */
+	var tool = {
+	    //获取地址栏参数
+	    getParamFromURL:function(argName){
+	        if(!argName){
+	            alert('没有输入参数名。')
+	            return;
+	        }
+	        if(typeof argName !== 'string'){
+	            alert('参数不是字符串类型。')
+	            return;
+	        }
+	        var args = location.search.substr(1),
+	            result = args.match('(^|&)'+argName +'=([^&]*)(&|$)');
+	        return (result)?result[2]:'';
+	    },
+	    //是否是中国移动手机号
+	    isChinaMobile:function(num){
+	        var chinaMobileArr = ["134", "135", "136", "137", "138", "139", "158", "159", "157", "150", "151", "188", "182", "147", "152", "183", "187", "184", "178"],
+	            chinaMobileArrStr = chinaMobileArr.join(''),
+	            result = num.match(/0?(13|14|15|18)[0-9]{9}/);
+	        if(result){
+	            if(chinaMobileArrStr.indexOf(result.input.substr(0,3)) >= 0){
+	                return result.input;
+	            }else{
+	                console.log('输入的参数不是移动手机号');
+	            }
+	        }else{
+	            console.log('输入的参数不是手机号');
+	        }
+	    }
+	};
+
+	module.exports = tool;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	/**
+	 * Created by anna on 16/9/3.
+	 *参数说明：
+	 *time:需要进行倒计时的时间总数,数字类型
+	 *btn:倒计时其间状态不可点击的按钮,input type="button"的dom对象
+	 *btnFontColor:'#f00',默认按钮的颜色
+	 *btnGreyFont:'#666',倒计时开始后的按钮颜色
+	 *btnBgColor:'#000',默认按钮的背景色
+	 *btnGreyBgColor:'#ccc',倒计时开始后的按钮背景色
+	 *btnTxt:arguments[0].btnTxt,默认按钮上的文字
+	 *changeTxt:显示倒计时秒数的文本,dom对象,如果倒计时按钮本身发生变化用不到这个参数
+	 *
+	 */
+
+	var countdown = function () {
+	    var timer;
+	    var d = {
+	        time:60,
+	        btnGreyFont:'#666',
+	        btnGreyBgColor:'#ccc',
+	        changeTxt:null,
+	        changeTxtContent:''
+	    };
+	    //要倒计时变化的数字
+	    var changeTime =arguments[0].time || d.time ;
+	    //必须大于两个参数
+	    if(!arguments[0].btn) return;
+	    //添加新参数
+	    for(var ele in arguments[0]){
+	        d[ele] = arguments[0][ele];
+	    }
+	    //添加默认的按钮文字到d
+	    d.btnTxt= d.btn.val();
+	    d.btnFontColor = d.btn.css('color');
+	    d.btnBgColor = d.btn.css('background');
+	    //循环执行的函数
+	    (function(time){
+	        var arg = arguments;
+	        if (changeTime <= 0) {
+	            d.btn.removeAttr("disabled");
+	            d.btn.css({'color': d.btnFontColor,'background':d.btnBgColor});
+	            d.btn.val(d.btnTxt);
+	            if(d.changeTxt){
+	                d.changeTxt.html(d.changeTxtContent);
+	            }
+	            changeTime = time;
+	            clearTimeout(timer);
+	        } else {
+	            d.btn.attr("disabled", true);
+	            d.btn.css({'color': d.btnGreyFont,'background': d.btnGreyBgColor});
+	            if(d.changeTxt){
+	                d.changeTxt.html(changeTime + '秒后再次获取');
+	            }else{
+	                d.btn.val(changeTime + '秒后再次获取');
+	            }
+	            changeTime--;
+	            timer = setTimeout(function () {
+	                arg.callee(changeTime);
+	            }, 1000);
+	        }
+	    }(d.time));
+	};
+	module.exports = countdown;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by anna on 16/9/5.
+	 * 提示框有多种情况
+	 * tip表示提示后3秒钟消失
+	 */
+	__webpack_require__(9);
+	//
+	var popWindow = {
+	    //str为提示语
+	    tip:function(str){
+	            var message = str || false;
+	            if(message){
+	                var windowEl=document.getElementById('popWindowTip');
+	                if(windowEl){
+	                    windowEl.innerHTML = str;
+	                    windowEl.style.display='block';
+	                }else{
+	                    windowEl=document.createElement('div');
+	                    windowEl.setAttribute('id','popWindowTip');
+	                    windowEl.innerHTML=str;
+	                    document.body.appendChild(windowEl);
+	                }
+	                setTimeout(function(){
+	                    hideWindow();
+	                },2000);
+	            }
+	        //隐藏弹窗 使用方法hideWindow();
+	        function hideWindow(){
+	            document.getElementById('popWindowTip').style.display = 'none';
+	        }
+	    }
+	};
+
+	module.exports = popWindow;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(10);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(4)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../node_modules/css-loader/index.js!./popWindowTip.css", function() {
+				var newContent = require("!!./../node_modules/css-loader/index.js!./popWindowTip.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(3)();
+	// imports
+
+
+	// module
+	exports.push([module.id, "#popWindowTip{width:80%;background: rgba(0,0,0,.3);position:fixed;top:50%;left:50%;transform:translate(-50%, -50%) ;padding:30px 0;color:#fff;border-radius: 5px;text-align:center;}", ""]);
+
+	// exports
 
 
 /***/ }
