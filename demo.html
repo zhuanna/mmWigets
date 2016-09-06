@@ -5,11 +5,20 @@
     <title>Title</title>
 </head>
 <body>
+<!--倒计时-->
 <input type="button" value="倒计时按钮" id="countDown">
+<!--cookie-->
+<input id="setContent" type="text">
+<div>刚刚存入的cookie内容是<span id="getContent" style="color:#f00"></span></div>
+<br/>
+<input type="button" value="存入cookie" id="setCookie" />
+<input type="button" value="读取cookie" id="getCookie" />
+<input type="button" value="删除cookie" id="delCookie" />
+<!---->
 <script src="bower_components/jquery/dist/jquery.min.js"></script>
 <script src="build/mmWigets.js"></script>
 <script>
-    //mmWigets
+    //isChinaMobile
     console.log(mmWigets.tool.isChinaMobile('15810891777'))
     console.log(mmWigets.tool.isChinaMobile('111111111'))
     console.log(mmWigets.tool.isChinaMobile('中'))
@@ -23,6 +32,22 @@
     });
     //popWindow
     mmWigets.popWinow.tip('我来也!')
+    //cookie
+    //设置cookie
+    $('#setCookie').bind('click',function(){
+        mmWigets.cookie.set('testCookie',$('#setContent').val().trim());
+    });
+    //读取cookie
+    $('#getCookie').bind('click',function(){
+        $('#getContent').html(mmWigets.cookie.get('testCookie'));
+    });
+    //删除cookie
+    $('#delCookie').bind('click',function(){
+        mmWigets.cookie.del('testCookie');
+        $('#getContent').html(mmWigets.cookie.get('testCookie'));
+    });
+    ////
+
 
 </script>
 </body>

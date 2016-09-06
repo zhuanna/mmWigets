@@ -3,9 +3,10 @@
  * 公共的ajax函数
  * 参数
  * url:请求地址
- * method:请求方式 get,post
+ * type:请求方式 get,post
  * data:请求参数--对象格式传入
- * callback回调参数
+ * success:成功回调参数
+ * error:失败回调参数
  */
 var ajax = function(arg){
 
@@ -25,17 +26,21 @@ var ajax = function(arg){
 
     $.ajax({
         url : arg.url,
-        method : arg.method || 'get',
+        type : arg.type || 'get',
         data : arg.data || {},
         dataType: arg.dataType || 'json',
         timeout : arg.timeout || 3000,
         success : function(data){
-            if(typeof arg.callback === 'function'){
-                arg.callback(data, arg.btn);
+            if(typeof arg.success === 'function'){
+                arg.success(data, arg.btn);
             }
         },
         error : function(xhr){
-            console.log(xhr);
+            if(typeof arg.error === 'function'){
+                arg.error(arg.btn,xhr);
+            }else{
+                console.log(xhr);
+            }
         }
     });
 };

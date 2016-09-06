@@ -58,7 +58,8 @@
 	    //base64 : require('./base64.js'),
 	    tool:__webpack_require__(6),
 	    countDown:__webpack_require__(7),
-	    popWinow:__webpack_require__(8)
+	    popWinow:__webpack_require__(8),
+	    //cookie:require('./cookie.js')
 	};
 
 /***/ },
@@ -418,9 +419,10 @@
 	 * 公共的ajax函数
 	 * 参数
 	 * url:请求地址
-	 * method:请求方式 get,post
+	 * type:请求方式 get,post
 	 * data:请求参数--对象格式传入
-	 * callback回调参数
+	 * success:成功回调参数
+	 * error:失败回调参数
 	 */
 	var ajax = function(arg){
 
@@ -440,17 +442,21 @@
 
 	    $.ajax({
 	        url : arg.url,
-	        method : arg.method || 'get',
+	        type : arg.type || 'get',
 	        data : arg.data || {},
 	        dataType: arg.dataType || 'json',
 	        timeout : arg.timeout || 3000,
 	        success : function(data){
-	            if(typeof arg.callback === 'function'){
-	                arg.callback(data, arg.btn);
+	            if(typeof arg.success === 'function'){
+	                arg.success(data, arg.btn);
 	            }
 	        },
 	        error : function(xhr){
-	            console.log(xhr);
+	            if(typeof arg.error === 'function'){
+	                arg.error(arg.btn,xhr);
+	            }else{
+	                console.log(xhr);
+	            }
 	        }
 	    });
 	};
@@ -507,7 +513,7 @@
 	 * Created by anna on 16/9/3.
 	 *参数说明：
 	 *time:需要进行倒计时的时间总数,数字类型
-	 *btn:倒计时其间状态不可点击的按钮,input type="button"的dom对象
+	 *btn:倒计时其间状态不可点击的按钮,input type="button"的juqery对象
 	 *btnFontColor:'#f00',默认按钮的颜色
 	 *btnGreyFont:'#666',倒计时开始后的按钮颜色
 	 *btnBgColor:'#000',默认按钮的背景色
@@ -554,9 +560,9 @@
 	            d.btn.attr("disabled", true);
 	            d.btn.css({'color': d.btnGreyFont,'background': d.btnGreyBgColor});
 	            if(d.changeTxt){
-	                d.changeTxt.html(changeTime + '秒后再次获取');
+	                d.changeTxt.html('重新发送('+ changeTime + ')');
 	            }else{
-	                d.btn.val(changeTime + '秒后再次获取');
+	                d.btn.val('重新发送('+ changeTime + ')');
 	            }
 	            changeTime--;
 	            timer = setTimeout(function () {
@@ -641,7 +647,7 @@
 
 
 	// module
-	exports.push([module.id, "#popWindowTip{width:80%;background: rgba(0,0,0,.3);position:fixed;top:50%;left:50%;transform:translate(-50%, -50%) ;padding:30px 0;color:#fff;border-radius: 5px;text-align:center;}", ""]);
+	exports.push([module.id, "#popWindowTip{width:80%;background: rgba(0,0,0,.5);position:fixed;top:50%;left:50%;transform:translate(-50%, -50%) ;padding:30px 0;color:#fff;border-radius: 5px;text-align:center;}", ""]);
 
 	// exports
 

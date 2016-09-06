@@ -12,5 +12,6 @@ window.mmWigets = {
     //base64 : require('./base64.js'),
     tool:require('./tool.js'),
     countDown:require('./countDown.js'),
-    popWinow:require('./popWindow.js')
+    popWinow:require('./popWindow.js'),
+    //cookie:require('./cookie.js')
 };

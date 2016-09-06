@@ -2,7 +2,7 @@
  * Created by anna on 16/9/3.
  *参数说明：
  *time:需要进行倒计时的时间总数,数字类型
- *btn:倒计时其间状态不可点击的按钮,input type="button"的dom对象
+ *btn:倒计时其间状态不可点击的按钮,input type="button"的juqery对象
  *btnFontColor:'#f00',默认按钮的颜色
  *btnGreyFont:'#666',倒计时开始后的按钮颜色
  *btnBgColor:'#000',默认按钮的背景色
@@ -49,9 +49,9 @@ var countdown = function () {
             d.btn.attr("disabled", true);
             d.btn.css({'color': d.btnGreyFont,'background': d.btnGreyBgColor});
             if(d.changeTxt){
-                d.changeTxt.html(changeTime + '秒后再次获取');
+                d.changeTxt.html('重新发送('+ changeTime + ')');
             }else{
-                d.btn.val(changeTime + '秒后再次获取');
+                d.btn.val('重新发送('+ changeTime + ')');
             }
             changeTime--;
             timer = setTimeout(function () {
