@@ -30,6 +30,7 @@ var ajax = function(arg){
         data : arg.data || {},
         dataType: arg.dataType || 'json',
         timeout : arg.timeout || 3000,
+        beforeSend: arg.beforeSend || null,
         success : function(data){
             if(typeof arg.success === 'function'){
                 arg.success(data, arg.btn);

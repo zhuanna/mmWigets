@@ -48,38 +48,241 @@
 	 * Created by anna on 16/8/29.
 	 */
 	//reqiure
-	__webpack_require__(1);
+	//require('normalize.css');
 	//全局变量
 	window.mmWigets = {
 	    //tab : require('./tab.js'),
-	    //addMore : require('./addMore.js'),
-	    ajax : __webpack_require__(5),
 	    //createMoreBtn : require('./createMoreBtn.js'),
+	    //addMore : require('./addMore.js'),
+	    ajax : __webpack_require__(1),
 	    //base64 : require('./base64.js'),
-	    tool:__webpack_require__(6),
-	    countDown:__webpack_require__(7),
-	    popWinow:__webpack_require__(8),
-	    //cookie:require('./cookie.js')
+	    tool:__webpack_require__(2),
+	    countDown:__webpack_require__(3),
+	    popWinow:__webpack_require__(4),
+	    cookie:__webpack_require__(9)
 	};
 
 /***/ },
 /* 1 */
+/***/ function(module, exports) {
+
+	/**
+	 * Created by anna on 16/8/22.
+	 * 公共的ajax函数
+	 * 参数
+	 * url:请求地址
+	 * type:请求方式 get,post
+	 * data:请求参数--对象格式传入
+	 * success:成功回调参数
+	 * error:失败回调参数
+	 */
+	var ajax = function(arg){
+
+	    if(!arg.url){
+	        alert('没有url参数');
+	        return;
+	    }
+
+	    if(arg.data && typeof arg.data != 'object'){
+	        alert('请输入key-value格式的参数');
+	        return;
+	    }
+
+	    arg.data = (arg.data)?arg.data:{};
+
+	    arg.data.ran = new Date().getTime();
+
+	    $.ajax({
+	        url : arg.url,
+	        type : arg.type || 'get',
+	        data : arg.data || {},
+	        dataType: arg.dataType || 'json',
+	        timeout : arg.timeout || 3000,
+	        beforeSend: arg.beforeSend || null,
+	        success : function(data){
+	            if(typeof arg.success === 'function'){
+	                arg.success(data, arg.btn);
+	            }
+	        },
+	        error : function(xhr){
+	            if(typeof arg.error === 'function'){
+	                arg.error(arg.btn,xhr);
+	            }else{
+	                console.log(xhr);
+	            }
+	        }
+	    });
+	};
+
+	module.exports = ajax;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	/**
+	 * Created by anna on 16/9/2.
+	 * 工具函数tool
+	 */
+	var tool = {
+	    //获取地址栏参数
+	    getParamFromURL:function(argName){
+	        if(!argName){
+	            alert('没有输入参数名。')
+	            return;
+	        }
+	        if(typeof argName !== 'string'){
+	            alert('参数不是字符串类型。')
+	            return;
+	        }
+	        var args = location.search.substr(1),
+	            result = args.match('(^|&)'+argName +'=([^&]*)(&|$)');
+	        return (result)?result[2]:'';
+	    },
+	    //是否是中国移动手机号
+	    isChinaMobile:function(num){
+	        var chinaMobileArr = ["134", "135", "136", "137", "138", "139", "158", "159", "157", "150", "151", "188", "182", "147", "152", "183", "187", "184", "178"],
+	            chinaMobileArrStr = chinaMobileArr.join(''),
+	            result = num.match(/0?(13|14|15|18)[0-9]{9}/);
+	        if(result){
+	            if(chinaMobileArrStr.indexOf(result.input.substr(0,3)) >= 0){
+	                return result.input;
+	            }else{
+	                console.log('输入的参数不是移动手机号');
+	            }
+	        }else{
+	            console.log('输入的参数不是手机号');
+	        }
+	    }
+	};
+
+	module.exports = tool;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	/**
+	 * Created by anna on 16/9/3.
+	 *参数说明：
+	 *time:需要进行倒计时的时间总数,数字类型
+	 *btn:倒计时其间状态不可点击的按钮,input type="button"的juqery对象
+	 *btnFontColor:'#f00',默认按钮的颜色
+	 *btnGreyFont:'#666',倒计时开始后的按钮颜色
+	 *btnBgColor:'#000',默认按钮的背景色
+	 *btnGreyBgColor:'#ccc',倒计时开始后的按钮背景色
+	 *btnTxt:arguments[0].btnTxt,默认按钮上的文字
+	 *changeTxt:显示倒计时秒数的文本,dom对象,如果倒计时按钮本身发生变化用不到这个参数
+	 *
+	 */
+
+	var countdown = function () {
+	    var timer;
+	    var d = {
+	        time:60,
+	        btnGreyFont:'#666',
+	        btnGreyBgColor:'#ccc',
+	        changeTxt:null,
+	        changeTxtContent:''
+	    };
+	    //要倒计时变化的数字
+	    var changeTime =arguments[0].time || d.time ;
+	    //必须大于两个参数
+	    if(!arguments[0].btn) return;
+	    //添加新参数
+	    for(var ele in arguments[0]){
+	        d[ele] = arguments[0][ele];
+	    }
+	    //添加默认的按钮文字到d
+	    d.btnTxt= d.btn.val();
+	    d.btnFontColor = d.btn.css('color');
+	    d.btnBgColor = d.btn.css('background');
+	    //循环执行的函数
+	    (function(time){
+	        var arg = arguments;
+	        if (changeTime <= 0) {
+	            d.btn.removeAttr("disabled");
+	            d.btn.css({'color': d.btnFontColor,'background':d.btnBgColor});
+	            d.btn.val(d.btnTxt);
+	            if(d.changeTxt){
+	                d.changeTxt.html(d.changeTxtContent);
+	            }
+	            changeTime = time;
+	            clearTimeout(timer);
+	        } else {
+	            d.btn.attr("disabled", true);
+	            d.btn.css({'color': d.btnGreyFont,'background': d.btnGreyBgColor});
+	            if(d.changeTxt){
+	                d.changeTxt.html('重新发送('+ changeTime + ')');
+	            }else{
+	                d.btn.val('重新发送('+ changeTime + ')');
+	            }
+	            changeTime--;
+	            timer = setTimeout(function () {
+	                arg.callee(changeTime);
+	            }, 1000);
+	        }
+	    }(d.time));
+	};
+	module.exports = countdown;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by anna on 16/9/5.
+	 * 提示框有多种情况
+	 * tip表示提示后3秒钟消失
+	 */
+	__webpack_require__(5);
+	//
+	var popWindow = {
+	    //str为提示语
+	    tip:function(str){
+	            var message = str || false;
+	            if(message){
+	                var windowEl=document.getElementById('popWindowTip');
+	                if(windowEl){
+	                    windowEl.innerHTML = str;
+	                    windowEl.style.display='block';
+	                }else{
+	                    windowEl=document.createElement('div');
+	                    windowEl.setAttribute('id','popWindowTip');
+	                    windowEl.innerHTML=str;
+	                    document.body.appendChild(windowEl);
+	                }
+	                setTimeout(function(){
+	                    hideWindow();
+	                },2000);
+	            }
+	        //隐藏弹窗 使用方法hideWindow();
+	        function hideWindow(){
+	            document.getElementById('popWindowTip').style.display = 'none';
+	        }
+	    }
+	};
+
+	module.exports = popWindow;
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(2);
+	var content = __webpack_require__(6);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(4)(content, {});
+	var update = __webpack_require__(8)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../css-loader/index.js!./normalize.css", function() {
-				var newContent = require("!!./../css-loader/index.js!./normalize.css");
+			module.hot.accept("!!./../node_modules/css-loader/index.js!./popWindowTip.css", function() {
+				var newContent = require("!!./../node_modules/css-loader/index.js!./popWindowTip.css");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -89,21 +292,21 @@
 	}
 
 /***/ },
-/* 2 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(3)();
+	exports = module.exports = __webpack_require__(7)();
 	// imports
 
 
 	// module
-	exports.push([module.id, "/*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */\n\n/**\n * 1. Change the default font family in all browsers (opinionated).\n * 2. Correct the line height in all browsers.\n * 3. Prevent adjustments of font size after orientation changes in IE and iOS.\n */\n\nhtml {\n  font-family: sans-serif; /* 1 */\n  line-height: 1.15; /* 2 */\n  -ms-text-size-adjust: 100%; /* 3 */\n  -webkit-text-size-adjust: 100%; /* 3 */\n}\n\n/**\n * Remove the margin in all browsers (opinionated).\n */\n\nbody {\n  margin: 0;\n}\n\n/* HTML5 display definitions\n   ========================================================================== */\n\n/**\n * Add the correct display in IE 9-.\n * 1. Add the correct display in Edge, IE, and Firefox.\n * 2. Add the correct display in IE.\n */\n\narticle,\naside,\ndetails, /* 1 */\nfigcaption,\nfigure,\nfooter,\nheader,\nmain, /* 2 */\nmenu,\nnav,\nsection,\nsummary { /* 1 */\n  display: block;\n}\n\n/**\n * Add the correct display in IE 9-.\n */\n\naudio,\ncanvas,\nprogress,\nvideo {\n  display: inline-block;\n}\n\n/**\n * Add the correct display in iOS 4-7.\n */\n\naudio:not([controls]) {\n  display: none;\n  height: 0;\n}\n\n/**\n * Add the correct vertical alignment in Chrome, Firefox, and Opera.\n */\n\nprogress {\n  vertical-align: baseline;\n}\n\n/**\n * Add the correct display in IE 10-.\n * 1. Add the correct display in IE.\n */\n\ntemplate, /* 1 */\n[hidden] {\n  display: none;\n}\n\n/* Links\n   ========================================================================== */\n\n/**\n * 1. Remove the gray background on active links in IE 10.\n * 2. Remove gaps in links underline in iOS 8+ and Safari 8+.\n */\n\na {\n  background-color: transparent; /* 1 */\n  -webkit-text-decoration-skip: objects; /* 2 */\n}\n\n/**\n * Remove the outline on focused links when they are also active or hovered\n * in all browsers (opinionated).\n */\n\na:active,\na:hover {\n  outline-width: 0;\n}\n\n/* Text-level semantics\n   ========================================================================== */\n\n/**\n * 1. Remove the bottom border in Firefox 39-.\n * 2. Add the correct text decoration in Chrome, Edge, IE, Opera, and Safari.\n */\n\nabbr[title] {\n  border-bottom: none; /* 1 */\n  text-decoration: underline; /* 2 */\n  text-decoration: underline dotted; /* 2 */\n}\n\n/**\n * Prevent the duplicate application of `bolder` by the next rule in Safari 6.\n */\n\nb,\nstrong {\n  font-weight: inherit;\n}\n\n/**\n * Add the correct font weight in Chrome, Edge, and Safari.\n */\n\nb,\nstrong {\n  font-weight: bolder;\n}\n\n/**\n * Add the correct font style in Android 4.3-.\n */\n\ndfn {\n  font-style: italic;\n}\n\n/**\n * Correct the font size and margin on `h1` elements within `section` and\n * `article` contexts in Chrome, Firefox, and Safari.\n */\n\nh1 {\n  font-size: 2em;\n  margin: 0.67em 0;\n}\n\n/**\n * Add the correct background and color in IE 9-.\n */\n\nmark {\n  background-color: #ff0;\n  color: #000;\n}\n\n/**\n * Add the correct font size in all browsers.\n */\n\nsmall {\n  font-size: 80%;\n}\n\n/**\n * Prevent `sub` and `sup` elements from affecting the line height in\n * all browsers.\n */\n\nsub,\nsup {\n  font-size: 75%;\n  line-height: 0;\n  position: relative;\n  vertical-align: baseline;\n}\n\nsub {\n  bottom: -0.25em;\n}\n\nsup {\n  top: -0.5em;\n}\n\n/* Embedded content\n   ========================================================================== */\n\n/**\n * Remove the border on images inside links in IE 10-.\n */\n\nimg {\n  border-style: none;\n}\n\n/**\n * Hide the overflow in IE.\n */\n\nsvg:not(:root) {\n  overflow: hidden;\n}\n\n/* Grouping content\n   ========================================================================== */\n\n/**\n * 1. Correct the inheritance and scaling of font size in all browsers.\n * 2. Correct the odd `em` font sizing in all browsers.\n */\n\ncode,\nkbd,\npre,\nsamp {\n  font-family: monospace, monospace; /* 1 */\n  font-size: 1em; /* 2 */\n}\n\n/**\n * Add the correct margin in IE 8.\n */\n\nfigure {\n  margin: 1em 40px;\n}\n\n/**\n * 1. Add the correct box sizing in Firefox.\n * 2. Show the overflow in Edge and IE.\n */\n\nhr {\n  box-sizing: content-box; /* 1 */\n  height: 0; /* 1 */\n  overflow: visible; /* 2 */\n}\n\n/* Forms\n   ========================================================================== */\n\n/**\n * 1. Change font properties to `inherit` in all browsers (opinionated).\n * 2. Remove the margin in Firefox and Safari.\n */\n\nbutton,\ninput,\noptgroup,\nselect,\ntextarea {\n  font: inherit; /* 1 */\n  margin: 0; /* 2 */\n}\n\n/**\n * Restore the font weight unset by the previous rule.\n */\n\noptgroup {\n  font-weight: bold;\n}\n\n/**\n * Show the overflow in IE.\n * 1. Show the overflow in Edge.\n */\n\nbutton,\ninput { /* 1 */\n  overflow: visible;\n}\n\n/**\n * Remove the inheritance of text transform in Edge, Firefox, and IE.\n * 1. Remove the inheritance of text transform in Firefox.\n */\n\nbutton,\nselect { /* 1 */\n  text-transform: none;\n}\n\n/**\n * 1. Prevent a WebKit bug where (2) destroys native `audio` and `video`\n *    controls in Android 4.\n * 2. Correct the inability to style clickable types in iOS and Safari.\n */\n\nbutton,\nhtml [type=\"button\"], /* 1 */\n[type=\"reset\"],\n[type=\"submit\"] {\n  -webkit-appearance: button; /* 2 */\n}\n\n/**\n * Remove the inner border and padding in Firefox.\n */\n\nbutton::-moz-focus-inner,\n[type=\"button\"]::-moz-focus-inner,\n[type=\"reset\"]::-moz-focus-inner,\n[type=\"submit\"]::-moz-focus-inner {\n  border-style: none;\n  padding: 0;\n}\n\n/**\n * Restore the focus styles unset by the previous rule.\n */\n\nbutton:-moz-focusring,\n[type=\"button\"]:-moz-focusring,\n[type=\"reset\"]:-moz-focusring,\n[type=\"submit\"]:-moz-focusring {\n  outline: 1px dotted ButtonText;\n}\n\n/**\n * Change the border, margin, and padding in all browsers (opinionated).\n */\n\nfieldset {\n  border: 1px solid #c0c0c0;\n  margin: 0 2px;\n  padding: 0.35em 0.625em 0.75em;\n}\n\n/**\n * 1. Correct the text wrapping in Edge and IE.\n * 2. Correct the color inheritance from `fieldset` elements in IE.\n * 3. Remove the padding so developers are not caught out when they zero out\n *    `fieldset` elements in all browsers.\n */\n\nlegend {\n  box-sizing: border-box; /* 1 */\n  color: inherit; /* 2 */\n  display: table; /* 1 */\n  max-width: 100%; /* 1 */\n  padding: 0; /* 3 */\n  white-space: normal; /* 1 */\n}\n\n/**\n * Remove the default vertical scrollbar in IE.\n */\n\ntextarea {\n  overflow: auto;\n}\n\n/**\n * 1. Add the correct box sizing in IE 10-.\n * 2. Remove the padding in IE 10-.\n */\n\n[type=\"checkbox\"],\n[type=\"radio\"] {\n  box-sizing: border-box; /* 1 */\n  padding: 0; /* 2 */\n}\n\n/**\n * Correct the cursor style of increment and decrement buttons in Chrome.\n */\n\n[type=\"number\"]::-webkit-inner-spin-button,\n[type=\"number\"]::-webkit-outer-spin-button {\n  height: auto;\n}\n\n/**\n * 1. Correct the odd appearance in Chrome and Safari.\n * 2. Correct the outline style in Safari.\n */\n\n[type=\"search\"] {\n  -webkit-appearance: textfield; /* 1 */\n  outline-offset: -2px; /* 2 */\n}\n\n/**\n * Remove the inner padding and cancel buttons in Chrome and Safari on OS X.\n */\n\n[type=\"search\"]::-webkit-search-cancel-button,\n[type=\"search\"]::-webkit-search-decoration {\n  -webkit-appearance: none;\n}\n\n/**\n * Correct the text style of placeholders in Chrome, Edge, and Safari.\n */\n\n::-webkit-input-placeholder {\n  color: inherit;\n  opacity: 0.54;\n}\n\n/**\n * 1. Correct the inability to style clickable types in iOS and Safari.\n * 2. Change font properties to `inherit` in Safari.\n */\n\n::-webkit-file-upload-button {\n  -webkit-appearance: button; /* 1 */\n  font: inherit; /* 2 */\n}\n", ""]);
+	exports.push([module.id, "#popWindowTip{width:80%;background: rgba(0,0,0,.5);position:fixed;top:50%;left:50%;transform:translate(-50%, -50%) ;padding:30px 0;color:#fff;border-radius: 5px;text-align:center;}", ""]);
 
 	// exports
 
 
 /***/ },
-/* 3 */
+/* 7 */
 /***/ function(module, exports) {
 
 	/*
@@ -159,7 +362,7 @@
 
 
 /***/ },
-/* 4 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -411,246 +614,49 @@
 
 
 /***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	/**
-	 * Created by anna on 16/8/22.
-	 * 公共的ajax函数
-	 * 参数
-	 * url:请求地址
-	 * type:请求方式 get,post
-	 * data:请求参数--对象格式传入
-	 * success:成功回调参数
-	 * error:失败回调参数
-	 */
-	var ajax = function(arg){
-
-	    if(!arg.url){
-	        alert('没有url参数');
-	        return;
-	    }
-
-	    if(arg.data && typeof arg.data != 'object'){
-	        alert('请输入key-value格式的参数');
-	        return;
-	    }
-
-	    arg.data = (arg.data)?arg.data:{};
-
-	    arg.data.ran = new Date().getTime();
-
-	    $.ajax({
-	        url : arg.url,
-	        type : arg.type || 'get',
-	        data : arg.data || {},
-	        dataType: arg.dataType || 'json',
-	        timeout : arg.timeout || 3000,
-	        success : function(data){
-	            if(typeof arg.success === 'function'){
-	                arg.success(data, arg.btn);
-	            }
-	        },
-	        error : function(xhr){
-	            if(typeof arg.error === 'function'){
-	                arg.error(arg.btn,xhr);
-	            }else{
-	                console.log(xhr);
-	            }
-	        }
-	    });
-	};
-
-	module.exports = ajax;
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	/**
-	 * Created by anna on 16/9/2.
-	 * 工具函数tool
-	 */
-	var tool = {
-	    //获取地址栏参数
-	    getParamFromURL:function(argName){
-	        if(!argName){
-	            alert('没有输入参数名。')
-	            return;
-	        }
-	        if(typeof argName !== 'string'){
-	            alert('参数不是字符串类型。')
-	            return;
-	        }
-	        var args = location.search.substr(1),
-	            result = args.match('(^|&)'+argName +'=([^&]*)(&|$)');
-	        return (result)?result[2]:'';
-	    },
-	    //是否是中国移动手机号
-	    isChinaMobile:function(num){
-	        var chinaMobileArr = ["134", "135", "136", "137", "138", "139", "158", "159", "157", "150", "151", "188", "182", "147", "152", "183", "187", "184", "178"],
-	            chinaMobileArrStr = chinaMobileArr.join(''),
-	            result = num.match(/0?(13|14|15|18)[0-9]{9}/);
-	        if(result){
-	            if(chinaMobileArrStr.indexOf(result.input.substr(0,3)) >= 0){
-	                return result.input;
-	            }else{
-	                console.log('输入的参数不是移动手机号');
-	            }
-	        }else{
-	            console.log('输入的参数不是手机号');
-	        }
-	    }
-	};
-
-	module.exports = tool;
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	/**
-	 * Created by anna on 16/9/3.
-	 *参数说明：
-	 *time:需要进行倒计时的时间总数,数字类型
-	 *btn:倒计时其间状态不可点击的按钮,input type="button"的juqery对象
-	 *btnFontColor:'#f00',默认按钮的颜色
-	 *btnGreyFont:'#666',倒计时开始后的按钮颜色
-	 *btnBgColor:'#000',默认按钮的背景色
-	 *btnGreyBgColor:'#ccc',倒计时开始后的按钮背景色
-	 *btnTxt:arguments[0].btnTxt,默认按钮上的文字
-	 *changeTxt:显示倒计时秒数的文本,dom对象,如果倒计时按钮本身发生变化用不到这个参数
-	 *
-	 */
-
-	var countdown = function () {
-	    var timer;
-	    var d = {
-	        time:60,
-	        btnGreyFont:'#666',
-	        btnGreyBgColor:'#ccc',
-	        changeTxt:null,
-	        changeTxtContent:''
-	    };
-	    //要倒计时变化的数字
-	    var changeTime =arguments[0].time || d.time ;
-	    //必须大于两个参数
-	    if(!arguments[0].btn) return;
-	    //添加新参数
-	    for(var ele in arguments[0]){
-	        d[ele] = arguments[0][ele];
-	    }
-	    //添加默认的按钮文字到d
-	    d.btnTxt= d.btn.val();
-	    d.btnFontColor = d.btn.css('color');
-	    d.btnBgColor = d.btn.css('background');
-	    //循环执行的函数
-	    (function(time){
-	        var arg = arguments;
-	        if (changeTime <= 0) {
-	            d.btn.removeAttr("disabled");
-	            d.btn.css({'color': d.btnFontColor,'background':d.btnBgColor});
-	            d.btn.val(d.btnTxt);
-	            if(d.changeTxt){
-	                d.changeTxt.html(d.changeTxtContent);
-	            }
-	            changeTime = time;
-	            clearTimeout(timer);
-	        } else {
-	            d.btn.attr("disabled", true);
-	            d.btn.css({'color': d.btnGreyFont,'background': d.btnGreyBgColor});
-	            if(d.changeTxt){
-	                d.changeTxt.html('重新发送('+ changeTime + ')');
-	            }else{
-	                d.btn.val('重新发送('+ changeTime + ')');
-	            }
-	            changeTime--;
-	            timer = setTimeout(function () {
-	                arg.callee(changeTime);
-	            }, 1000);
-	        }
-	    }(d.time));
-	};
-	module.exports = countdown;
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by anna on 16/9/5.
-	 * 提示框有多种情况
-	 * tip表示提示后3秒钟消失
-	 */
-	__webpack_require__(9);
-	//
-	var popWindow = {
-	    //str为提示语
-	    tip:function(str){
-	            var message = str || false;
-	            if(message){
-	                var windowEl=document.getElementById('popWindowTip');
-	                if(windowEl){
-	                    windowEl.innerHTML = str;
-	                    windowEl.style.display='block';
-	                }else{
-	                    windowEl=document.createElement('div');
-	                    windowEl.setAttribute('id','popWindowTip');
-	                    windowEl.innerHTML=str;
-	                    document.body.appendChild(windowEl);
-	                }
-	                setTimeout(function(){
-	                    hideWindow();
-	                },2000);
-	            }
-	        //隐藏弹窗 使用方法hideWindow();
-	        function hideWindow(){
-	            document.getElementById('popWindowTip').style.display = 'none';
-	        }
-	    }
-	};
-
-	module.exports = popWindow;
-
-/***/ },
 /* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	// style-loader: Adds some css to the DOM by adding a <style> tag
+	/*
+	 *Created by anna on 16/9/6.
+	 *设置cookie cookie.set(name, value, expires, path, domain, secure)
+	 *获取cookie cookie.get(name)
+	 *删除cookie cookie.del(name, path, domain, secure)
+	 */
+	var cookie = {
+	    get: function(name) {
+	        var cookie = document.cookie;
+	        var cookieName = encodeURIComponent(name) + "=";
+	        var start = cookie.indexOf(cookieName);
+	        var value = null;
+	        if (start > -1)
+	        {
+	            var end = cookie.indexOf(";", start);
+	            if (end == -1)
+	                end = cookie.length;
+	            value = decodeURIComponent(cookie.substring(start + cookieName.length, end));
+	        }
+	        return value;
+	    },
+	    set: function(name, value, expires, path, domain, secure) {
+	        var cookieText = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+	        if (expires instanceof Date)
+	            cookieText += "; expires=" + expires.toGMTString();
+	        if (path)
+	            cookieText += "; path=" + path;
+	        if (domain)
+	            cookieText += "; domain=" + domain;
+	        if (secure)
+	            cookieText += "; secure";
 
-	// load the styles
-	var content = __webpack_require__(10);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(4)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../node_modules/css-loader/index.js!./popWindowTip.css", function() {
-				var newContent = require("!!./../node_modules/css-loader/index.js!./popWindowTip.css");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(3)();
-	// imports
-
-
-	// module
-	exports.push([module.id, "#popWindowTip{width:80%;background: rgba(0,0,0,.5);position:fixed;top:50%;left:50%;transform:translate(-50%, -50%) ;padding:30px 0;color:#fff;border-radius: 5px;text-align:center;}", ""]);
-
-	// exports
-
+	        document.cookie = cookieText;
+	    },
+	    del: function(name, path, domain, secure) {
+	        this.set(name, "", new Date(0), path, domain, secure);
+	    }
+	};
+	//exports
+	module.exports = cookie;
 
 /***/ }
 /******/ ]);
